@@ -19,13 +19,14 @@ WORKDIR /code
 COPY req.txt /code/req.txt
 
 RUN pip install --upgrade pip
-RUN pip install --no-cache-dir --upgrade torch==2.0.0 torchvision==0.15.1 torchaudio==2.0.1 --index-url https://download.pytorch.org/whl/cu118
-RUN pip install --no-cache-dir --upgrade git+https://github.com/m-bain/whisperx.git
 RUN pip install --no-cache-dir --upgrade -r /code/req.txt
+RUN pip install git+https://github.com/m-bain/whisperx.git
 
-COPY cons /code/cons
+COPY app /code/app
 
 ENV PYTHONUNBUFFERED 1
-ENV PYTHONPATH="${PYTHONPATH}:/code/cons"
+ENV PYTHONPATH="${PYTHONPATH}:/code/app"
 
-CMD ["python", "/code/cons/ASRApp.py"]
+EXPOSE 82
+
+CMD ["uvicorn", "app.main:app", "--proxy-headers", "--host", "0.0.0.0", "--port", "80"]

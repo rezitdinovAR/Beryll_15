@@ -9,5 +9,5 @@ tags_metadata = [
     }
 ]
 description = """
-ASR service
+stt service
 """

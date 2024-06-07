@@ -151,4 +151,3 @@ wheel==0.43.0
 widgetsnbextension==4.0.10
 win-inet-pton==1.1.0
 zipp==3.17.0
-pika

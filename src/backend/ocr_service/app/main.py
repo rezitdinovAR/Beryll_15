@@ -7,7 +7,7 @@ from tags import description, tags_metadata
 
 
 app = FastAPI(
-    title="Dabi ASR service",
+    title="ocr_service",
     description=description,
     version="0.1",
     openapi_tags=tags_metadata

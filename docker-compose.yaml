@@ -1,12 +1,16 @@
 version: '2.1'
 
 services:
-  asr_service:
-    container_name: asr_service_container
-    build: ./src/ASR
+  stt_service:
+    container_name: stt_service_container
+    build: ./src/backend/stt_service
     restart: always
+    ports:
+      - "80:80"
 
   ocr_service:
     container_name: ocr_service_container
-    build: ./src/OCR
+    build: ./src/backend/ocr_service
     restart: always
+    ports:
+      - "81:81"

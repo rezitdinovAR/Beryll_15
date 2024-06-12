@@ -1,0 +1,6 @@
+fastapi==0.110.2
+uvicorn==0.29.0
+torch==2.0.0
+transformers
+av
+pillow

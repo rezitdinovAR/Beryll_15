@@ -17,7 +17,7 @@ async def main():
 
 path='/api'
 
-@router.post(path + '/listen', tags=["Encoder"], response_model=TextData)
+@router.post(path + '/listen', tags=["Encoder"], response_model=FaissResponse)
 def transcribation(text: TextData) -> FaissResponse:
     indexx = encoder.get_emb(text.url,text.description)
     #print(type(transcribation_response), type(transcribation_response[0]))

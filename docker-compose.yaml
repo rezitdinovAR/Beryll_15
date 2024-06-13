@@ -1,66 +1,25 @@
 version: '3.8'
 
 services:
-  stt_service:
-    container_name: stt_service_container
-    build: ./src/backend/stt_service
-    ports:
-      - "82:82"
-    deploy:
-      resources:
-        reservations:
-          devices:
-          - driver: nvidia
-            device_ids: ['0']
-            capabilities: [gpu]
-
-  ocr_service:
-    container_name: ocr_service_container
-    build: ./src/backend/ocr_service
-    ports:
-      - "81:81"
-    deploy:
-      resources:
-        reservations:
-          devices:
-          - driver: nvidia
-            device_ids: ['0']
-            capabilities: [gpu]
-
-  video2text_service: 
-    container_name: video2text_container
-    build: ./src/backend/v2t_service
-    ports:
-      - "85:85"
-    deploy:
-      resources:
-        reservations:
-          devices:
-          - driver: nvidia
-            device_ids: ['1']
-            capabilities: [gpu]
-
-  encoder_service:
-    container_name: encoder_container
-    build: ./src/backend/encoder_service
-    ports:
-      - "8666:8666"
-    deploy:
-      resources:
-        reservations:
-          devices:
-          - driver: nvidia
-            device_ids: ['1']
-            capabilities: [gpu]
-    volumes:
-      - ./faiss_index:/code/app/faiss_index
-  
   server_service: 
     build:
       context: ./src/backend/server
     ports:
-      - "8666:8667"  
+      - "8667:8667"  
     volumes:
-      - ./src/backend/server/app:/app
-    command: go run main.go
-    network_mode: "host"
+      - ./src/backend/server/cmd:/app
+    command: go run cmd/main.go
+
+  db:
+    image: postgres:alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    ports:
+      - "5433:5433"
+    volumes:
+      - postgres-db:/var/lib/postgresql/data
+
+volumes:
+  postgres-db:

@@ -17,7 +17,5 @@ func main() {
 }
 
 func setupRoutes(app *fiber.App) {
-	app.Get("/client", handlers.ListFacts)
-
 	app.Post("/api/listen", handlers.SaveVideo)
 }

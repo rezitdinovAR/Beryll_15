@@ -6,22 +6,15 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func ListFacts(c *fiber.Ctx) error {
-	facts := []models.Fact{}
-	database.DB.Db.Find(&facts)
-
-	return c.Status(200).JSON(facts)
-}
-
 func SaveVideo(c *fiber.Ctx) error {
-	fact := new(models.Fact)
-	if err := c.BodyParser(fact); err != nil {
+	video := new(models.Video)
+	if err := c.BodyParser(video); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": err.Error(),
 		})
 	}
 
-	database.DB.Db.Create(&fact)
+	database.DB.Db.Create(&video)
 
-	return c.Status(200).JSON(fact)
+	return c.Status(200).JSON(video)
 }

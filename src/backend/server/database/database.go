@@ -18,7 +18,7 @@ type Dbinstance struct {
 var DB Dbinstance
 
 func ConnectDb() {
-	dsn := fmt.Sprintf("host=db user=postgres password=postgres dbname=postgres port=5432 sslmode=disable")
+	dsn := fmt.Sprintf("host=db user=postgres password=postgres dbname=postgres port=5433 sslmode=disable")
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
@@ -33,7 +33,7 @@ func ConnectDb() {
 	db.Logger = logger.Default.LogMode(logger.Info)
 
 	log.Println("running migrations")
-	db.AutoMigrate(&models.Fact{})
+	db.AutoMigrate(&models.Video{})
 
 	DB = Dbinstance{
 		Db: db,

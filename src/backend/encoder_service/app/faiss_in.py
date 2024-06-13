@@ -25,7 +25,7 @@ class Faiss():
         
     def write_indexx(self, embeddings):
         for idx, emb in enumerate(embeddings):
-            print(idx)
+            print(idx,emb)
             if isinstance(emb, np.ndarray):
                 if emb.ndim == 1:
                     emb = emb.reshape(1, -1)
@@ -39,13 +39,14 @@ class Faiss():
             self.save_index_to_file()
         self.counter += 1
     
-    def search_all(indices, query_embeddings, k=10):
+    def search_all(self, query_embeddings, k=10):
         results = []
-        results_D = []
-        for index, query in zip(indices, query_embeddings):
+        for index, query in zip(self.indices, query_embeddings):
             D, I = index.search(np.array([query]), k)
             results.append(I.tolist())
         
         result = list(set(sum(results, [])))
-        
-        return results, results_D
+        vectors = {int_your_specific_index:np.mean([np.linalg.norm(query_embeddings[i]-self.indices[i].reconstruct(int_your_specific_index)) for i in range(4)]) for int_your_specific_index in result}
+        top = sorted(vectors, key=vectors.get)
+        print(top)
+        return top

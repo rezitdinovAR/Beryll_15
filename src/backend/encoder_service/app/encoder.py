@@ -11,43 +11,8 @@ from fuzzywuzzy import process
 from schemas import VideoData, VisualData, AudioData
 import faiss
 import numpy as np
+from faiss_in import Faiss
 
-class Faiss():
-    def __init__(self):
-        self.indices = []
-        try: 
-            for idx in range(4):
-                index = faiss.read_index(f'/app/faiss_index/index_{idx}.faiss')
-                self.indices.append(index)
-            self.counter = index.ntotal
-        except Exception as e:
-            print(f"Ошибка при загрузке индексов: {e}")
-            self.indices = [faiss.IndexFlatL2(512) for _ in range(4)]
-            self.counter = 0
-
-    def save_index_to_file(self):
-        for idx, index in enumerate(self.indices):
-            file_path = f'/code/app/faiss_index/index_{idx}.faiss'
-            print(f"Trying to save index to {file_path}")
-            print("Current working directory:", os.getcwd())
-            print("Directory contents:", os.listdir('/code/app/faiss_index/'))
-            faiss.write_index(index, file_path)
-        
-    def write_indexx(self, embeddings):
-        for idx, emb in enumerate(embeddings):
-            print(idx)
-            if isinstance(emb, np.ndarray):
-                if emb.ndim == 1:
-                    emb = emb.reshape(1, -1)
-            else:
-                emb = np.array(emb)
-                if emb.ndim == 1:
-                    emb = emb.reshape(1, -1)
-        self.indices[idx].add(emb)
-        self.counter += 1
-        if self.counter % 10 == 0:
-            self.save_index_to_file()
-        
 class Encoder():
     ''' Initialize the parameters for the model '''
     def __init__(self):
@@ -155,11 +120,11 @@ class Encoder():
         with ThreadPoolExecutor(max_workers=len(api_endpoints)) as executor:
             for typ in data.keys():
                 if typ == "v2t" or typ == "asr":
-                    print(typ)
+                    #print(typ)
                     future = executor.submit(self.send_to_api, api_endpoints[typ], data[typ])
                     status_code, response = future.result()
                     response_text = response.text
-                    print(response_text,type(response_text))
+                    #print(response_text,type(response_text))
                     responses.append(response_text)
                 
                 else:
@@ -170,15 +135,17 @@ class Encoder():
                         response_text = response.text
                         print(response_text,type(response_text))
                         texts.append(response_text)
-                    print(texts)
+                    #print(texts)
                     response_text = self.get_uniq_texts(texts)
                     responses.append(response_text)
         responses.append(description)
-        print(len(self.encode(responses)[2]),len(self.encode(responses)),type(self.encode(responses)))
+        #print(len(self.encode(responses)[2]),len(self.encode(responses)),type(self.encode(responses)))
         self.faiss_base.write_indexx(self.encode(responses))
         print(type(self.faiss_base.counter))
         return self.faiss_base.counter
                 
-
+    def search(self,text):
+        x = self.encode(text)
+        return self.faiss.search_all(self.faiss.indices, [x for i in range(4)], k=10)
 
 

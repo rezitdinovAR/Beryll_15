@@ -1,14 +1,12 @@
 version: '3.8'
 
 services:
-  server_service: 
-    build:
-      context: ./src/backend/server
+  server: 
+    build: ./src/backend/server
     ports:
       - "8667:8667"  
     volumes:
-      - ./src/backend/server/cmd:/app
-    command: go run cmd/main.go
+      - .:/usr/src/app
 
   db:
     image: postgres:alpine

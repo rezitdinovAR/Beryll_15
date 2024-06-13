@@ -1,12 +1,9 @@
-# Используйте официальный образ Golang как базовый
-FROM golang:1.20 as builder
+FROM golang:1.20.4
 
-# Установите рабочую директорию в контейнере
-WORKDIR /
+WORKDIR /usr/src/app
 
-# Скопируйте go.mod и go.sum в контейнер
-COPY ./go.mod ./go.sum ./
-
-# Скопируйте исходный код приложения в контейнер
 COPY . .
-
+RUN go mod init server
+RUN go get 	"github.com/gofiber/fiber/v2" "gorm.io/driver/postgres" "gorm.io/gorm" "gorm.io/gorm/logger"
+RUN go build -o ./tmp/main ./cmd
+RUN ./tmp/main

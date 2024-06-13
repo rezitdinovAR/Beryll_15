@@ -1,11 +1,10 @@
-package database
+package main
 
 import (
 	"fmt"
 	"log"
 	"os"
 
-	"server/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -33,7 +32,7 @@ func ConnectDb() {
 	db.Logger = logger.Default.LogMode(logger.Info)
 
 	log.Println("running migrations")
-	db.AutoMigrate(&models.Video{})
+	db.AutoMigrate(&Video{})
 
 	DB = Dbinstance{
 		Db: db,

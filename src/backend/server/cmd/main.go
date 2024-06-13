@@ -1,13 +1,11 @@
 package main
 
 import (
-	"server/database"
-	"server/handlers"
 	"github.com/gofiber/fiber/v2"
 )
 
 func main() {
-	database.ConnectDb()
+	ConnectDb()
 
 	app := fiber.New()
 
@@ -17,5 +15,5 @@ func main() {
 }
 
 func setupRoutes(app *fiber.App) {
-	app.Post("/api/listen", handlers.SaveVideo)
+	app.Post("/api/listen", SaveVideo)
 }

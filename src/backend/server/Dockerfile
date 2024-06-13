@@ -1,12 +1,6 @@
-# Используйте официальный образ Golang как базовый
-FROM golang:1.20 as builder
+FROM golang:1.20.4
 
-# Установите рабочую директорию в контейнере
-WORKDIR /
+WORKDIR /usr/src/app
 
-# Скопируйте go.mod и go.sum в контейнер
-COPY ./go.mod ./go.sum ./
-
-# Скопируйте исходный код приложения в контейнер
 COPY . .
-
+RUN go mod tidy

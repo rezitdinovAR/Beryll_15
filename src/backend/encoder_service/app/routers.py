@@ -28,8 +28,8 @@ def transcribation(text: TextDataUrl) -> FaissResponse:
     )
 
 @router.get(path + '/get', tags=["Encoder"], response_model=TextData)
-def transcribation(text: TextData) -> TextData:
+def transcribation(text: TextData) -> TopResponse:
     indexes = encoder.search(text.text)
-    return FaissResponse(
+    return TopResponse(
         top=",".join(indexes),
     )

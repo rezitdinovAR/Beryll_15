@@ -1,34 +1,66 @@
-version: '2.1'
+version: '3.8'
 
 services:
   stt_service:
     container_name: stt_service_container
     build: ./src/backend/stt_service
-    restart: always
     ports:
-      - "80:80"
+      - "82:82"
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            device_ids: ['0']
+            capabilities: [gpu]
 
   ocr_service:
     container_name: ocr_service_container
     build: ./src/backend/ocr_service
-    restart: always
     ports:
       - "81:81"
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            device_ids: ['0']
+            capabilities: [gpu]
 
-  video2text_service:
+  video2text_service: 
     container_name: video2text_container
     build: ./src/backend/v2t_service
     ports:
       - "85:85"
-    environment:
-      - NVIDIA_VISIBLE_DEVICES=all
-      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            device_ids: ['1']
+            capabilities: [gpu]
 
   encoder_service:
     container_name: encoder_container
     build: ./src/backend/encoder_service
     ports:
-      - "86:86"
-    environment:
-      - NVIDIA_VISIBLE_DEVICES=all
-      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+      - "8666:8666"
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            device_ids: ['1']
+            capabilities: [gpu]
+    volumes:
+      - ./faiss_index:/code/app/faiss_index
+  
+  server_service: 
+    build:
+      context: ./src/backend/server
+    ports:
+      - "8666:8667"  
+    volumes:
+      - ./src/backend/server/app:/app
+    command: go run main.go
+    network_mode: "host"

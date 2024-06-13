@@ -24,6 +24,6 @@ def recognition(visual_message: VisualData) -> TextData:
     print(recognition_response)
 
     return TextData(
-            text=recognition_response
+            text=" ".join(recognition_response)
         )
     

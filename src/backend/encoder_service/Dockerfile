@@ -22,7 +22,9 @@ COPY req.txt /code/req.txt
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir --upgrade -r /code/req.txt
 #RUN pip install git+https://github.com/m-bain/whisperx.git
-
+RUN pip install av
+RUN pip install ffmpeg-python
+RUN apt-get update && apt-get install -y ffmpeg
 COPY app /code/app
 
 ENV PYTHONUNBUFFERED 1
@@ -30,4 +32,4 @@ ENV PYTHONPATH="${PYTHONPATH}:/code/app"
 
 EXPOSE 82
 
-CMD ["uvicorn", "app.main:app", "--proxy-headers", "--host", "0.0.0.0", "--port", "86"]
+CMD ["uvicorn", "app.main:app", "--proxy-headers", "--host", "0.0.0.0", "--port", "8666"]

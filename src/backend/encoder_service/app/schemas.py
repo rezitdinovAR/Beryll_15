@@ -7,10 +7,12 @@ class Metadata(BaseModel):
 
 
 class TextData(BaseModel):
-    text: str
+    url: str
+    description: str
 
-class EmbeddingResponse(BaseModel):
-    text: str
+class FaissResponse(BaseModel):
+    url: str
+    index: int
 
 class VideoData(BaseModel):
     mp4_base64: str

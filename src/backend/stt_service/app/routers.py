@@ -27,7 +27,7 @@ def trasncribation(audio_message: AudioData) -> TextData:
     2)обрабатываем пайплайном модели (средство - интерфейс)
     3)возвращаем транскрибацию в бэк
     '''
-    transcribation_response = listener.recognize(audio_message.data.wav_base64)
+    transcribation_response = listener.recognize(audio_message.wav_base64)
 
     return TextData(
             text=transcribation_response

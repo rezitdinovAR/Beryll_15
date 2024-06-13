@@ -2,3 +2,5 @@ fastapi==0.110.2
 uvicorn==0.29.0
 sentence_transformers
 python-ffmpeg
+fuzzywuzzy
+faiss-cpu

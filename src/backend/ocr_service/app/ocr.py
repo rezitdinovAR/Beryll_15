@@ -6,7 +6,8 @@ import base64
 class OCR:
     #init models and parameters
     def __init__(self):
-        self.model = easyocr.Reader(['ru','en']) #lang codes for recognition
+        self.device = True if torch.cuda.is_available() else False
+        self.model = easyocr.Reader(['ru','en'], gpu=self.device) #lang codes for recognition
 
     #recognize image using easyocr pipeline
     def recognize(self, b64_string):
@@ -15,5 +16,5 @@ class OCR:
         with open('out.png', 'wb') as file:
             file.write(image_data)
 
-        result = self.model.readtext('out.png', detail=0, gpu=True)
+        result = self.model.readtext('out.png', detail=0)
         return result

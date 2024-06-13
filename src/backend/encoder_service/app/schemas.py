@@ -6,9 +6,12 @@ class Metadata(BaseModel):
     user_id: str
 
 
-class TextData(BaseModel):
+class TextDataUrl(BaseModel):
     url: str
     description: str
+
+class TextData(BaseModel):
+    text: str
 
 class FaissResponse(BaseModel):
     url: str

@@ -120,11 +120,11 @@ class Encoder():
         with ThreadPoolExecutor(max_workers=len(api_endpoints)) as executor:
             for typ in data.keys():
                 if typ == "v2t" or typ == "asr":
-                    print(typ)
+                    #print(typ)
                     future = executor.submit(self.send_to_api, api_endpoints[typ], data[typ])
                     status_code, response = future.result()
                     response_text = response.text
-                    print(response_text,type(response_text))
+                    #print(response_text,type(response_text))
                     responses.append(response_text)
                 
                 else:
@@ -135,11 +135,11 @@ class Encoder():
                         response_text = response.text
                         print(response_text,type(response_text))
                         texts.append(response_text)
-                    print(texts)
+                    #print(texts)
                     response_text = self.get_uniq_texts(texts)
                     responses.append(response_text)
         responses.append(description)
-        print(len(self.encode(responses)[2]),len(self.encode(responses)),type(self.encode(responses)))
+        #print(len(self.encode(responses)[2]),len(self.encode(responses)),type(self.encode(responses)))
         self.faiss_base.write_indexx(self.encode(responses))
         print(type(self.faiss_base.counter))
         return self.faiss_base.counter

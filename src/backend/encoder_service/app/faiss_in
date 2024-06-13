@@ -34,9 +34,10 @@ class Faiss():
                 if emb.ndim == 1:
                     emb = emb.reshape(1, -1)
         self.indices[idx].add(emb)
-        self.counter += 1
+        
         if self.counter % 10 == 0:
             self.save_index_to_file()
+        self.counter += 1
     
     def search_all(indices, query_embeddings, k=10):
         results = []
@@ -44,5 +45,7 @@ class Faiss():
         for index, query in zip(indices, query_embeddings):
             D, I = index.search(np.array([query]), k)
             results.append(I.tolist())
-            results_D.append(D.tolist())
+        
+        result = list(set(sum(results, [])))
+        
         return results, results_D

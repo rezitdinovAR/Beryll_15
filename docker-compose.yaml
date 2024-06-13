@@ -7,7 +7,6 @@ services:
       - "8667:8667"  
     volumes:
       - .:/usr/src/app
-    command: go run src/backend/server/cmd/main.go
 
   db:
     image: postgres:alpine

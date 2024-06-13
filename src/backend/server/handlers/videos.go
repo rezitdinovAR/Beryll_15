@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"database"
-	"models"
+	"server/database"
+	"server/models"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -13,7 +13,7 @@ func ListFacts(c *fiber.Ctx) error {
 	return c.Status(200).JSON(facts)
 }
 
-func CreateFact(c *fiber.Ctx) error {
+func SaveVideo(c *fiber.Ctx) error {
 	fact := new(models.Fact)
 	if err := c.BodyParser(fact); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{

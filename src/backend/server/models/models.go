@@ -2,8 +2,8 @@ package models
 
 import "gorm.io/gorm"
 
-type Fact struct {
+type Video struct {
 	gorm.Model
-	Question string `json:"question" gorm:"text;not null;default:null`
-	Answer   string `json:"answer" gorm:"text;not null;default:null`
+	Url string `json:"url" gorm:"text;not null;default:null`
+	Index   string `json:"index" gorm:"text;not null;default:null`
 }

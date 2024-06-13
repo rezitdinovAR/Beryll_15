@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"../models"
+	"server/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -18,9 +18,7 @@ type Dbinstance struct {
 var DB Dbinstance
 
 func ConnectDb() {
-	dsn := fmt.Sprintf(
-		"host=db user=postgres password=postgres dbname=postgres port=5432 sslmode=disable"
-	)
+	dsn := fmt.Sprintf("host=db user=postgres password=postgres dbname=postgres port=5432 sslmode=disable")
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),

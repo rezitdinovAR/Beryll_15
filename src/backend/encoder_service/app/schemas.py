@@ -10,19 +10,23 @@ class TextDataUrl(BaseModel):
     url: str
     description: str
 
+
 class TextData(BaseModel):
     text: str
+
 
 class FaissResponse(BaseModel):
     url: str
     index: int
+
 
 class VideoData(BaseModel):
     mp4_base64: str
 
 class VisualData(BaseModel):
     '''Изображение в формате wav закодированное в base64'''
-    img_base64: str
+    img_base64: list
+    size: list
     
 class AudioData(BaseModel):
     '''Аудио в формате wav закодированное в base64'''

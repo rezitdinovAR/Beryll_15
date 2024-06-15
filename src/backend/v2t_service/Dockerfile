@@ -21,6 +21,7 @@ COPY req.txt /code/req.txt
 
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir --upgrade -r /code/req.txt
+RUN pip install sentencepiece
 #RUN pip install git+https://github.com/m-bain/whisperx.git
 
 COPY app /code/app

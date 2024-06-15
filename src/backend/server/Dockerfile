@@ -2,12 +2,16 @@ FROM golang:1.20.4
 
 WORKDIR /code
 
-RUN go install github.com/air-verse/air@latest
+RUN mkdir ./previews
 
-COPY cmd /code/cmd
-COPY tmp /code/tmp
-COPY go.mod /code
-COPY go.sum /code
+COPY cmd ./cmd
+COPY go.mod .
+COPY go.sum .
+RUN go build -o main ./cmd
+
+ENTRYPOINT [ "/code/main" ]
+
+
 
 
 

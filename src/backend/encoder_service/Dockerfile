@@ -25,6 +25,8 @@ RUN pip install --no-cache-dir --upgrade -r /code/req.txt
 RUN pip install av
 RUN pip install ffmpeg-python
 RUN apt-get update && apt-get install -y ffmpeg
+RUN pip install pillow
+
 COPY app /code/app
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONPATH="${PYTHONPATH}:/code/app"

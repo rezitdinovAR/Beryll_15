@@ -10,11 +10,20 @@ class OCR:
         self.model = easyocr.Reader(['ru','en'], gpu=self.device) #lang codes for recognition
 
     #recognize image using easyocr pipeline
-    def recognize(self, b64_string):
-        image_data = base64.b64decode(b64_string)
+    def recognize(self, b64_strings,size):
 
-        with open('out.png', 'wb') as file:
-            file.write(image_data)
 
-        result = self.model.readtext('out.png', detail=0)
-        return result
+        temps = []
+
+
+        for i in range(len(b64_strings)):
+            image_data = base64.b64decode(b64_strings[i])
+
+
+            with open(f'out{i}.png', 'wb') as file:
+                file.write(image_data)
+                temps.append(f'out{i}.png')
+            
+        print(size)
+        results = self.model.readtext_batched(temps,n_width=size[0],n_height=size[1], detail=0)
+        return results

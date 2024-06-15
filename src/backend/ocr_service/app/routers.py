@@ -20,10 +20,10 @@ path='/api'
 @router.post(path + '/recognize', tags=["Optical character recognition"], response_model=TextData)
 def recognition(visual_message: VisualData) -> TextData:
 
-    recognition_response = ocr.recognize(visual_message.img_base64)
+    recognition_response = ocr.recognize(visual_message.img_base64, visual_message.size)
     print(recognition_response)
 
     return TextData(
-            text=" ".join(recognition_response)
+            text=" ".join([" ".join(recognition) for recognition in recognition_response])
         )
     

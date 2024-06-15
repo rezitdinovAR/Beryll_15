@@ -32,9 +32,21 @@ func ConnectDb() {
 	db.Logger = logger.Default.LogMode(logger.Info)
 
 	log.Println("running migrations")
-	db.AutoMigrate(&Video{})
+
+	db.AutoMigrate(&SaveUrl{})
 
 	DB = Dbinstance{
 		Db: db,
 	}
+}
+
+func WriteToDb(video SaveUrl) {
+	fmt.Println("write to db: " + string(video.ID) + string(video.Index) + video.Url)
+	DB.Db.Create(&video)
+}
+
+func SearchInDb(indexes []int) (urls []SaveUrl) {
+	DB.Db.Where("index IN ?", indexes).Find(&urls)
+	fmt.Println("read from db: " + string(len(urls)))
+	return urls
 }

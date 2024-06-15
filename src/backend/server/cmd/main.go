@@ -1,19 +1,23 @@
 package main
 
 import (
-	"github.com/gofiber/fiber/v2"
+	"fmt"
+	"net/http"
+	"time"
 )
 
 func main() {
+	time.Sleep(10 * time.Second)
 	ConnectDb()
+	go SendFromCsv()
 
-	app := fiber.New()
+	http.HandleFunc("/api/search", SearchForFront)
+	http.HandleFunc("/api/upload", UploadForFront)
+	http.HandleFunc("/api/metric", SearchForMetric)
 
-	setupRoutes(app)
+	fmt.Println("Server is listening on port 8910...")
+	if err := http.ListenAndServe(":8910", nil); err != nil {
+		fmt.Printf("Error starting server: %s\n", err)
+	}
 
-	app.Listen(":8910")
-}
-
-func setupRoutes(app *fiber.App) {
-	app.Post("/api/listen", SaveVideo)
 }

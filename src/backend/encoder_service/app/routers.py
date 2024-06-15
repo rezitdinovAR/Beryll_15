@@ -27,9 +27,14 @@ def transcribation(text: TextDataUrl) -> FaissResponse:
         index=int(indexx)
     )
 
-@router.get(path + '/get', tags=["Encoder"], response_model=TextData)
-def transcribation(text: TextData) -> TopResponse:
+@router.post(path + '/get', tags=["Encoder"])
+def transcribation(text: TextData) :
     indexes = encoder.search(text.text)
-    return TopResponse(
-        top=",".join(indexes),
-    )
+    print(indexes, type(indexes))
+    return indexes
+
+@router.post(path + '/metric', tags=["Encoder"])
+def transcribation(text: TextData) :
+    indexes = encoder.search_four(text.text)
+    print(indexes, type(indexes))
+    return indexes

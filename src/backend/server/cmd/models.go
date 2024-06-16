@@ -20,6 +20,14 @@ type Ids struct {
 	Ids []int `json:"indexes" gorm:"not null;default:null`
 }
 
+type Id struct {
+	Id int `json:"index" gorm:"not null;default:null`
+}
+
+type Description struct {
+	description int `json:"description" gorm:"not null;default:null`
+}
+
 type SaveUrl struct {
 	gorm.Model
 	Url         string `json:"url" gorm:"text;not null;default:null`

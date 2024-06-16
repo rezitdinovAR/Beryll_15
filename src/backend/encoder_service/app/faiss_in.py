@@ -28,9 +28,10 @@ class Faiss():
             print("Directory contents:", os.listdir('/code/app/faiss_index/'))
             faiss.write_index(index, file_path)
         
-    def write_indexx(self, embeddings):
+    def write_indexx(self, embeddings,ind):
         for idx, emb in enumerate(embeddings):
-            
+            if idx not in ind:
+                continue
             if isinstance(emb, np.ndarray):
                 if emb.ndim == 1:
                     emb = emb.reshape(1, -1)

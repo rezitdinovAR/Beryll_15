@@ -37,3 +37,6 @@ class AudioData(BaseModel):
 
 class TopResponse(BaseModel):
     top: str
+
+class TextDataDescription(BaseModel):
+    description: str

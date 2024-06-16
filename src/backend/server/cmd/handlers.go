@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -170,4 +171,36 @@ func SearchInModel(requestData Request, url string) []SaveUrl {
 		fmt.Println("Error: received status code", resp.StatusCode)
 	}
 	return nil
+}
+
+func GetDescription(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Не тот метод", http.StatusBadRequest)
+		return
+	}
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Ошибка чтения тела запроса", http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
+
+	var requestData Id
+	err = json.Unmarshal(body, &requestData)
+	if err != nil {
+		http.Error(w, "Ошибка разбора JSON", http.StatusBadRequest)
+		return
+	}
+	fmt.Println("Запрошено описание на ID: " + strconv.Itoa(requestData.Id))
+
+	SearchInDb([]int{requestData.Id})
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	_, err = w.Write(body)
+	if err != nil {
+		http.Error(w, "Ошибка при отправке ответа", http.StatusInternalServerError)
+		return
+	}
 }

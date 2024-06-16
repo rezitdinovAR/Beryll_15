@@ -14,6 +14,7 @@ func main() {
 	http.HandleFunc("/api/search", SearchForFront)
 	http.HandleFunc("/api/upload", UploadForFront)
 	http.HandleFunc("/api/metric", SearchForMetric)
+	http.HandleFunc("/api/set", GetDescription)
 
 	fmt.Println("Server is listening on port 8910...")
 	if err := http.ListenAndServe(":8910", corsMiddleware(http.DefaultServeMux)); err != nil {

@@ -27,7 +27,7 @@ class Encoder():
     def __init__(self):
         self.model = SentenceTransformer('./models/distiluse-base-multilingual-cased-v2/snapshots/03a0532331151aeb3e1d2e602ffad62bb212a38d') 
         self.faiss_base = Faiss()
-
+        self.counter = 0
 
     def encode(self, texts) -> List[float]:
         embeddings = self.model.encode(texts)
@@ -204,7 +204,7 @@ class Encoder():
                 
         
         for i in range((len(video_urls))):
-            self.faiss_base.write_indexx(self.encode(responsess[i]))
+            self.faiss_base.write_indexx(self.encode(responsess[i]),[0,1,2,3])
 
         k = self.faiss_base.counter-((len(video_urls))-1)
         res = []
@@ -221,4 +221,6 @@ class Encoder():
         x = self.encode(text)
         return self.faiss_base.search_four([x for i in range(4)], k=4)
 
-
+    def set_description(self,text):
+        faiss.write_indexx([self.enocde(text) for i in range(4)],[3])
+        

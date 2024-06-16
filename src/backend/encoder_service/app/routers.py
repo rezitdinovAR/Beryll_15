@@ -4,7 +4,7 @@ import starlette.status as status
 import json
 from typing import List
 
-from schemas import FaissResponse, TextData, Metadata, TextDataUrl, TopResponse, TextDataUrls
+from schemas import FaissResponse, TextData, Metadata, TextDataUrl, TopResponse, TextDataUrls, TextDataDescription
 from encoder import Encoder
 
 router = APIRouter()
@@ -47,3 +47,8 @@ def transcribation(text: TextData) :
     indexes = encoder.search_four(text.text)
     print(indexes, type(indexes))
     return indexes
+
+@router.post(path + '/set', tags=["Encoder"])
+def transcribation(text: TextDataDescription):
+    encoder.set_description(text.description)
+    return text.description

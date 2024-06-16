@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Body
 from fastapi.responses import RedirectResponse
 import starlette.status as status
+import json
+from typing import List
 
-from schemas import FaissResponse, TextData, Metadata, TextDataUrl, TopResponse
+from schemas import FaissResponse, TextData, Metadata, TextDataUrl, TopResponse, TextDataUrls
 from encoder import Encoder
 
 router = APIRouter()
@@ -17,15 +19,22 @@ async def main():
 
 path='/api'
 
-@router.post(path + '/listen', tags=["Encoder"], response_model=FaissResponse)
-def transcribation(text: TextDataUrl) -> FaissResponse:
-    indexx = encoder.get_emb(text.url,text.description)
+@router.post(path + '/listen', tags=["Encoder"])
+def transcribation(text:List[TextDataUrl]):
+    print(text, type(text))
+    urls = []
+    descriptions = []
+    
+    for item in text:
+        urls.append(item.url)
+        descriptions.append(item.description)
+    indexx = encoder.get_emb(urls,descriptions)
     #print(type(transcribation_response), type(transcribation_response[0]))
-    print(str(text.url),int(indexx))
-    return FaissResponse(
-        url=str(text.url),
-        index=int(indexx)
-    )
+    print(indexx)
+    return [FaissResponse(
+        url=str(index[0]),
+        index=int(index[1])
+    ) for index in indexx]
 
 @router.post(path + '/get', tags=["Encoder"])
 def transcribation(text: TextData) :

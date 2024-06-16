@@ -39,7 +39,7 @@ class Faiss():
                 if emb.ndim == 1:
                     emb = emb.reshape(1, -1)
             emb = np.atleast_2d(emb)
-            print("--------",emb.shape)
+            #print("--------",emb.shape)
             self.indices[idx].add(emb)
         
         if self.counter % 10 == 0:
@@ -53,7 +53,7 @@ class Faiss():
             if index.ntotal==0:
                 print("faiss пуст")
                 return False
-            D, I = index.search(np.array(query), k)
+            D, I = index.search(np.array(query).reshape(1, -1), k)
             results.append(I.tolist()[0])
             Dd.append(D.tolist()[0])
         result = set([item for sublist in results for item in sublist])
@@ -65,6 +65,10 @@ class Faiss():
             for i in range(4):
                 if i==0:
                     vector.append(np.linalg.norm(query_embeddings[i]-self.indices[i].reconstruct(resu))/1.35)
+                elif i==1:
+                    vector.append(np.linalg.norm(query_embeddings[i]-self.indices[i].reconstruct(resu))*1.2)
+                elif i==3:
+                    vector.append(np.linalg.norm(query_embeddings[i]-self.indices[i].reconstruct(resu))*1.15)
                 else:
                     vector.append(np.linalg.norm(query_embeddings[i]-self.indices[i].reconstruct(resu)))
                 key.append(resu+1)
@@ -98,7 +102,7 @@ class Faiss():
             if index.ntotal==0:
                 print("faiss пуст")
                 return False
-            D, I = index.search(np.array(query), k)
+            D, I = index.search(np.array(query).reshape(1, -1), k)
             results.append(I.tolist()[0])
             
         result = [0,0,0,0]
@@ -106,5 +110,6 @@ class Faiss():
             for z in range(4):
                 if results[i][z] not in result:
                     result[i]=results[i][z]+1
+                    continue
             
         return result

@@ -5,10 +5,12 @@ class Metadata(BaseModel):
     '''Мета информация - что-то не относящиеся к данным, например сессия, идентификатор пользователя, что годно'''
     user_id: str
 
-
 class TextDataUrl(BaseModel):
     url: str
     description: str
+
+class TextDataUrls(BaseModel):
+    json: List[TextDataUrl]
 
 
 class TextData(BaseModel):

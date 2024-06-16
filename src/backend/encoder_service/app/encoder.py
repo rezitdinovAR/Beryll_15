@@ -13,6 +13,13 @@ import faiss
 import numpy as np
 from faiss_in import Faiss
 from PIL import Image
+import multiprocessing
+from multiprocessing import set_start_method
+
+try:
+    multiprocessing.set_start_method('spawn')
+except RuntimeError:
+    pass
 
 class Encoder():
 
@@ -46,18 +53,24 @@ class Encoder():
 
     def extract_audio_video(self,input_file, audio_output):
     # Извлечение аудио дорожки в формате WAV с частотой дискретизации 16000 Гц
-        (
-            ffmpeg
-            .input(input_file)
-            .output(audio_output, acodec='pcm_s16le', ar='16000')
-            .run(overwrite_output=True, quiet=True)
-        )
-
-    def get_frames(self,filename):
+        try:
+            (
+                ffmpeg
+                .input(input_file)
+                .output(audio_output, acodec='pcm_s16le', ar='16000')
+                .run(overwrite_output=True, capture_stdout=True, capture_stderr=True)
+            )
+        except ffmpeg.Error as e:  # Перехватываем исключение ffmpeg.Error
+            print("Ошибка при выполнении ffmpeg:")
+            print("stdout:", e.stdout.decode('utf-8'))  # Выводим стандартный поток вывода
+            print("stderr:", e.stderr.decode('utf-8'))  # Выводим поток ошибок
+            return False  # Повторно вызываем исключение для дальнейшей обработки или журналирования
+    def get_frames(self,filename,image_filename):
         container = av.open(filename)
         frame_count=0
         size = [0,0]
         for frame in container.decode(video=0):
+            #print("++++++++++++++++++++++++++")
             try:
                 if isinstance(frame, av.video.frame.VideoFrame):
                     frame_count += 1
@@ -65,8 +78,8 @@ class Encoder():
                         image = frame.to_image()
                         if size == [0,0]:
                             size = [image.size[0],image.size[0]]
-                            
-                        frame.to_image().save('temp%04d.jpg' % frame.index)
+                        #print(str(image_filename)+'%04d.jpg' % frame.index)
+                        frame.to_image().save(str(image_filename)+'%04d.jpg' % frame.index)
                         
             except AttributeError as e:
                 print(f"Ошибка при обработке кадра: {e}")
@@ -103,27 +116,58 @@ class Encoder():
             else:
                 text_result+=text+". "
         return text_result
+
+    def process_single(self,data):
+            video_filename,audio_filename,image_filename,video_url = data
+            self.download_video(video_url,video_filename)
+            video_base64=self.file_to_base64(video_filename)
+            booler = self.extract_audio_video(video_filename, audio_filename)
+            if booler !=False:
+                audio_base64 = self.file_to_base64(audio_filename)
+            else:
+                audio_base64 = ""
+            size = self.get_frames(video_filename,image_filename)
+            images_base64 = []
+
+            for root, subdirs, files in os.walk("."):
+                for file in files:
+                    #print(os.path.splitext(file)[1].lower() in ('.jpg', '.jpeg') and image_filename==str(os.path.splitext(file)[0])[:-1])
+
+                    if os.path.splitext(file)[1].lower() in ('.jpg', '.jpeg') and image_filename in str(os.path.splitext(file)[0]):
+                        images_base64.append(self.file_to_base64(os.path.join(root, file)))
+                        os.remove(os.path.join(root, file))
+            return video_base64, audio_base64, images_base64, size, booler 
+    
+    def getter(self,video_filenames,audio_filenames,image_filenames,video_urls,i):
+        results = self.process_single((video_filenames[i],audio_filenames[i],image_filenames[i],video_urls[i]))
+        return results
+    
+    def get_emb(self,video_urls,descriptions):
         
+        video_filenames = ["temp1.mp4","temp2.mp4","temp3.mp4","temp4.mp4"]
+        audio_filenames = ["temp1.wav","temp2.wav","temp3.wav","temp4.wav"]
+        image_filenames = ["temp1","temp2","temp3","temp4"]
         
-    def get_emb(self,video_url,description):
-        video_filename = "temp.mp4"
-        audio_filename = "temp.wav"
-        
-        self.download_video(video_url,video_filename)
-        self.extract_audio_video(video_filename, audio_filename)
-        size = self.get_frames(video_filename)
-
-        video_base64 = self.file_to_base64(video_filename)
-        audio_base64 = self.file_to_base64(audio_filename)
-
-        images_base64 = []
-
-        for root, subdirs, files in os.walk("."):
-            for file in files:
-                if os.path.splitext(file)[1].lower() in ('.jpg', '.jpeg'):
-                    images_base64.append(self.file_to_base64(os.path.join(root, file)))
-                    os.remove(os.path.join(root, file))
-
+        results = []
+        video_base64s = []
+        audio_base64s = []
+        images_base64s = []
+        size = []
+        bools  = []
+        for i in range(len(video_urls)):
+            
+            result = self.getter(video_filenames,audio_filenames,image_filenames,video_urls,i)
+            #print(len(result))
+            video_base64, audio_base64, images_base64, siz, bool = result
+            #print(len(video_base64))
+            video_base64s.append(video_base64)
+            audio_base64s.append(audio_base64)
+            images_base64s.append(images_base64)
+            size.append(siz)
+            bools.append(bool)
+            
+        #print(len(results))
+        #video_base64s, audio_base64s, images_base64s, size, bools = zip(*results)
         api_endpoints = {
             "v2t":"http://video2text_service:85/api/listen",
             "ocr":"http://ocr_service:81/api/recognize",
@@ -131,28 +175,43 @@ class Encoder():
         }
 
         data = {
-            "v2t":VideoData(mp4_base64=video_base64).dict(),
-            "ocr":VisualData(img_base64=images_base64, size = size).dict(),
-            "asr":AudioData(wav_base64=audio_base64,sample_rate=16000).dict()
+            "v2t":[VideoData(mp4_base64=video_base64).dict() for video_base64 in video_base64s],
+            "ocr":[VisualData(img_base64=images_base64s[i], size = size[i]).dict() for i in range(len(video_urls))],
+            "asr":[AudioData(wav_base64=audio_base64,sample_rate=16000).dict() for audio_base64 in audio_base64s]
         }
-        responses =  []
-        with ThreadPoolExecutor(max_workers=len(api_endpoints)) as executor:
-            for typ in data.keys():
-                if typ=="ocr":
-                    if size == [0,0]:
-                        responses.append("")
-                        continue
-                    
-                future = executor.submit(self.send_to_api, api_endpoints[typ], data[typ])
-                status_code, response = future.result()
-                response_text = response.text
-                responses.append(response_text)
-                
-        responses.append(description)
-        print(responses)
-        self.faiss_base.write_indexx(self.encode(responses))
+        responsess =  []
+        with ThreadPoolExecutor(max_workers=len(api_endpoints)*len(video_urls)) as executor:
+            for i in range(len(video_urls)):
+                responses = []
+                for typ in data.keys():
+                    if typ=="ocr":
+                        
+                        if size[i] == [0,0]:
+                            responses.append("")
+                            continue
+                    elif typ=="asr":  
+                        if bools[i] == False:
+                            responses.append("")
+                            continue
+                    future = executor.submit(self.send_to_api, api_endpoints[typ], data[typ][i]) 
+                    status_code, response = future.result()
+                    response_text = response.text
+                    responses.append(response_text)
+                responses.append(descriptions[i])
+                responsess.append(responses)
 
-        return self.faiss_base.counter
+                
+                
+        
+        for i in range((len(video_urls))):
+            self.faiss_base.write_indexx(self.encode(responsess[i]))
+
+        k = self.faiss_base.counter-((len(video_urls))-1)
+        res = []
+        for i in range(len(video_urls)):
+            res.append([video_urls[i],k])
+            k+=1
+        return res
                 
     def search(self,text):
         x = self.encode(text)

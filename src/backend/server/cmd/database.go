@@ -20,7 +20,7 @@ func ConnectDb() {
 	dsn := fmt.Sprintf("host=db user=postgres password=postgres dbname=postgres port=5432")
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
+		Logger: logger.Default.LogMode(logger.Silent),
 	})
 
 	if err != nil {
@@ -29,7 +29,7 @@ func ConnectDb() {
 	}
 
 	log.Println("connected")
-	db.Logger = logger.Default.LogMode(logger.Info)
+	db.Logger = logger.Default.LogMode(logger.Silent)
 
 	log.Println("running migrations")
 
@@ -40,9 +40,11 @@ func ConnectDb() {
 	}
 }
 
-func WriteToDb(video SaveUrl) {
-	fmt.Println("write to db: " + string(video.ID) + string(video.Index) + video.Url)
-	DB.Db.Create(&video)
+func WriteToDbAny(videos []SaveUrl) {
+	for _, v := range videos {
+		fmt.Println("write to db: " + string(v.Description) + string(v.Index) + v.Url)
+		DB.Db.Create(&v)
+	}
 }
 
 func SearchInDb(indexes []int) (urls []SaveUrl) {

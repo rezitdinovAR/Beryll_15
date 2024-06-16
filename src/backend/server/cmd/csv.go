@@ -23,6 +23,7 @@ func SendFromCsv() {
 
 	i := 0
 	average := 0.0
+	sendData := make([]SendUrl, 0)
 	for {
 		timeStart := time.Now()
 		record, err := reader.Read()
@@ -35,14 +36,21 @@ func SendFromCsv() {
 		}
 		videoURL := strings.TrimSpace(record[0])
 
-		var urls []SaveUrl
-		if DB.Db.Where("url = ?", videoURL).Find(&urls); len(urls) == 0 {
-			DownloadToModel(SendUrl{Url: videoURL, Description: desc}, "http://encoder_service:8666/api/listen")
-			timeDiff := time.Now().Sub(timeStart).Seconds()
-			average += timeDiff
+		var testUrl SaveUrl
+		if error := DB.Db.Where("url = ?", videoURL).First(&testUrl); error.Error != nil {
 			i++
-			fmt.Println("download timeDiff: " + fmt.Sprintf("%.2f", timeDiff) + " average: " + fmt.Sprintf("%.2f", average/float64(i)))
+			sendData = append(sendData, SendUrl{Url: videoURL, Description: desc})
+			if i%4 == 0 {
+				DownloadToModelAny(sendData, "http://encoder_service:8666/api/listen")
+				timeDiff := time.Now().Sub(timeStart).Seconds()
+				average += timeDiff
+				fmt.Println("download timeDiff: " + fmt.Sprintf("%.2f", timeDiff)) //+ " average: " + fmt.Sprintf("%.2f", average/float64(i)))
+				sendData = make([]SendUrl, 0)
+			}
 		} else {
+			testUrl.Description = desc
+			println("Update desc: " + desc)
+			DB.Db.Save(&testUrl)
 			println("Already upload: " + videoURL)
 		}
 	}

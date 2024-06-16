@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strconv"
 	"time"
 )
 
@@ -60,6 +59,43 @@ func SearchForFront(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response, err := json.Marshal(dbData)
+	if err != nil {
+		http.Error(w, "Ошибка формирования ответа", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	_, err = w.Write(response)
+	if err != nil {
+		http.Error(w, "Ошибка при отправке ответа", http.StatusInternalServerError)
+		return
+	}
+}
+
+func Search(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Не тот метод", http.StatusBadRequest)
+		return
+	}
+
+	requestData := r.URL.Query().Get("text")
+
+	dbData := SearchInModel(Request{SearchText: requestData}, "http://encoder_service:8666/api/get")
+	if len(dbData) > 10 {
+		//
+	}
+	if dbData == nil {
+		http.Error(w, "Ошибка поиска в модели", http.StatusNotFound)
+	}
+	responseData := make([]SendLink, 0)
+	for i, _ := range dbData {
+		responseData = append(responseData, SendLink{
+			Description: dbData[i].Description,
+			Link:        dbData[i].Url,
+		})
+	}
+
+	response, err := json.Marshal(responseData)
 	if err != nil {
 		http.Error(w, "Ошибка формирования ответа", http.StatusInternalServerError)
 		return
@@ -173,34 +209,26 @@ func SearchInModel(requestData Request, url string) []SaveUrl {
 	return nil
 }
 
-func GetDescription(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "Не тот метод", http.StatusBadRequest)
+func GetDescription(requestData Description, url string) {
+	jsonData, err := json.Marshal(requestData)
+	if err != nil {
+		fmt.Println("Error get marshal desc:", err)
 		return
 	}
 
-	body, err := io.ReadAll(r.Body)
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
-		http.Error(w, "Ошибка чтения тела запроса", http.StatusBadRequest)
+		fmt.Println("Error making POST request desc:", err)
 		return
 	}
-	defer r.Body.Close()
+	defer resp.Body.Close()
 
-	var requestData Id
-	err = json.Unmarshal(body, &requestData)
-	if err != nil {
-		http.Error(w, "Ошибка разбора JSON", http.StatusBadRequest)
-		return
-	}
-	fmt.Println("Запрошено описание на ID: " + strconv.Itoa(requestData.Id))
-
-	SearchInDb([]int{requestData.Id})
-
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
-	_, err = w.Write(body)
-	if err != nil {
-		http.Error(w, "Ошибка при отправке ответа", http.StatusInternalServerError)
-		return
+	if resp.StatusCode == http.StatusOK {
+		if err := json.NewDecoder(resp.Body).Decode(&Description{}); err != nil {
+			fmt.Println("Error decoding response desc:", err)
+			return
+		}
+	} else {
+		fmt.Println("Error: received status code", resp.StatusCode)
 	}
 }

@@ -31,6 +31,7 @@ class Encoder():
 
     def encode(self, texts) -> List[float]:
         embeddings = self.model.encode(texts)
+        print(len(embeddings))
         return [embedding.tolist() for embedding in embeddings]
 
 
@@ -39,7 +40,7 @@ class Encoder():
         try:
             response = requests.get(url, stream=True)
         except Exception as e:
-            print("Шамиль пидор: ", url)
+            print("Плохой url адрес: ", url)
         else:
             response = requests.get(url, stream=True)
 
@@ -204,9 +205,10 @@ class Encoder():
                 
         
         for i in range((len(video_urls))):
-            self.faiss_base.write_indexx(self.encode(responsess[i]),[0,1,2,3])
+            self.faiss_base.write_indexx(self.encode(responsess[i]),[0,1,2])
 
         k = self.faiss_base.counter-((len(video_urls))-1)
+        print(k)
         res = []
         for i in range(len(video_urls)):
             res.append([video_urls[i],k])
@@ -222,5 +224,8 @@ class Encoder():
         return self.faiss_base.search_four([x for i in range(4)], k=4)
 
     def set_description(self,text):
-        faiss.write_indexx([self.enocde(text) for i in range(4)],[3])
+        if text == "":
+            text = "нет описания"
+        text = text.replace("#","")
+        self.faiss_base.write_indexx([self.encode(text) for i in range(4)],[3])
         

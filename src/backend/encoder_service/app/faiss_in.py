@@ -5,14 +5,17 @@ import os
 class Faiss():
     def __init__(self):
         self.indices = []
-        try: 
-            for idx in range(4):
+        cou = 0
+        for idx in range(4):
+            try: 
                 index = faiss.read_index(f'/code/app/faiss_index/index_{idx}.faiss')
                 self.indices.append(index)
-            self.counter = index.ntotal
-        except Exception as e:
-            print(f"Ошибка при загрузке индексов: {e}")
-            self.indices = [faiss.IndexFlatL2(512) for _ in range(4)]
+                self.counter = index.ntotal
+            except Exception as e:
+                print(f"Ошибка при загрузке индексов: {e}")
+                self.indices.append(faiss.IndexFlatL2(512))
+                cou +=1
+        if cou == 4:
             self.counter = 0
 
     def normalize_vectors(self, vectors):
@@ -45,7 +48,8 @@ class Faiss():
         
         if self.counter % 10 == 0:
             self.save_index_to_file()
-        self.counter += 1
+        if len(ind)>1:
+            self.counter += 1
     
     def search_all(self, query_embeddings, k=10):
         results = []
@@ -71,7 +75,7 @@ class Faiss():
                 elif i==3:
                     vector.append(np.linalg.norm(query_embeddings[i]-self.indices[i].reconstruct(resu))*1.15)
                 else:
-                    vector.append(np.linalg.norm(query_embeddings[i]-self.indices[i].reconstruct(resu)))
+                    vector.append(np.linalg.norm(query_embeddings[i]-self.indices[i].reconstruct(resu))*1.1)
                 key.append(resu+1)
                 number.append(i)
 

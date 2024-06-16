@@ -22,6 +22,7 @@ func SendFromCsv() {
 	reader.Comma = ','
 
 	i := 0
+	ii := 0
 	average := 0.0
 	sendData := make([]SendUrl, 0)
 	for {
@@ -37,17 +38,26 @@ func SendFromCsv() {
 		videoURL := strings.TrimSpace(record[0])
 
 		var testUrl SaveUrl
+		ii++
+		fmt.Println(ii)
 		if error := DB.Db.Where("url = ?", videoURL).First(&testUrl); error.Error != nil {
 			i++
 			sendData = append(sendData, SendUrl{Url: videoURL, Description: desc})
 			if i%4 == 0 {
 				DownloadToModelAny(sendData, "http://encoder_service:8666/api/listen")
+				GetDescription(Description{Description: sendData[0].Description}, "http://encoder_service:8666/api/set")
+				GetDescription(Description{Description: sendData[1].Description}, "http://encoder_service:8666/api/set")
+				GetDescription(Description{Description: sendData[2].Description}, "http://encoder_service:8666/api/set")
+				GetDescription(Description{Description: sendData[3].Description}, "http://encoder_service:8666/api/set")
 				timeDiff := time.Now().Sub(timeStart).Seconds()
 				average += timeDiff
 				fmt.Println("download timeDiff: " + fmt.Sprintf("%.2f", timeDiff)) //+ " average: " + fmt.Sprintf("%.2f", average/float64(i)))
 				sendData = make([]SendUrl, 0)
 			}
 		} else {
+			if ii <= 6311 {
+				GetDescription(Description{Description: desc}, "http://encoder_service:8666/api/set")
+			}
 			testUrl.Description = desc
 			println("Update desc: " + desc)
 			DB.Db.Save(&testUrl)

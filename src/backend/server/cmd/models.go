@@ -25,7 +25,7 @@ type Id struct {
 }
 
 type Description struct {
-	description int `json:"description" gorm:"not null;default:null`
+	Description string `json:"description" gorm:"not null;default:null`
 }
 
 type SaveUrl struct {

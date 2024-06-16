@@ -51,4 +51,5 @@ def transcribation(text: TextData) :
 @router.post(path + '/set', tags=["Encoder"])
 def transcribation(text: TextDataDescription):
     encoder.set_description(text.description)
-    return text.description
+    print("-")
+    return TextDataDescription(description=text.description)

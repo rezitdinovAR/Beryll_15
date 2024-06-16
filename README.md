@@ -57,5 +57,5 @@ API ручка: РУЧКА ГДЕ ЛЕЖИТ <br />
 
 ## Контакты
 **В случае вопросов обращаться:**
-1. Telegram: [t.me/rezitdinovAR]
+1. Telegram: [t.me/rezitdinovAR](https://t.me/rezitdinovAR)
 2. e-mail: [rezitdinovar@mail.ru]

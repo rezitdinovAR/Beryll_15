@@ -3,3 +3,4 @@ pkg/*
 tmp/*
 faiss_index/
 yappy_hackaton_2024_400k.csv
+.idea/
